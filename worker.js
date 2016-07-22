@@ -8,17 +8,19 @@ module.exports = function Worker(ee, loc) {
     var a = new PokemonGO.Pokeio();
 
     //Set environment variables or replace placeholder text
+    console.log(loc);
+
     var location = {
         type: 'name',
         name: loc //'4775 league island blvd 19112'
     };
 
-    var username = creds.ptc.user,
+    /*var username = creds.ptc.user,
         password = creds.ptc.pass,
-        provider = creds.ptc.type;
-    /*var username = creds.google.user,
+        provider = creds.ptc.type;*/
+    var username = creds.google.user,
         password = creds.google.pass,
-        provider = creds.google.type;*/
+        provider = creds.google.type;
 
     var knownPoke = [];
 
@@ -64,7 +66,7 @@ module.exports = function Worker(ee, loc) {
                                 map: 'http://maps.google.com?q=' + poke.Latitude + ',' + poke.Longitude
                             };
                             console.log(knownPoke[poke.EncounterId]);
-                            ee.emit('WORKER.SENDMESSAGE');
+                            ee.emit('WORKER.SENDMESSAGE', knownPoke[poke.EncounterId]);
                         }
                     }
 

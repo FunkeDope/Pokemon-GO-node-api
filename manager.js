@@ -25,7 +25,7 @@ if(typeof localStorage === "undefined" || localStorage === null) {
 }
 
 //hangouts bot
-var notify = [];
+var notify = ['3hvvsimj9o2702ju1nxslmi12s@public.talk.google.com/lcsw_hangouts_5C7DBA35'];
 var bot = new hangoutsBot(creds.hangouts.user, creds.hangouts.pass);
 
 bot.on('message', function(from, msg) {
@@ -140,7 +140,7 @@ function initManager() {
         });
 
         ee.on('WORKER.SENDMESSAGE', function(poke) {
-            console.log('Sending alert!');
+            console.log('Sending alert!', poke);
             for(var i = 0; i < notify.length; i++) {
                 bot.sendMessage(notify[i], 'A wild ' + poke.name + ' appeared!\nYou have ~' + poke.timeRemaining + ' to get it!\n' + poke.map);
             }
