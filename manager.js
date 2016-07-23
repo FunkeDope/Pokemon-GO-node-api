@@ -47,6 +47,7 @@ bot.on('message', function(from, msg) {
             startWorkers();
         }
         addUser(from);
+        bot.sendMessage(from, 'Updated watch location...');
     }
     else {
         console.log(from + ' >> ' + msg);
@@ -74,6 +75,7 @@ function addUser(from) {
     if(!exists) {
         notify.push(from);
         console.log('Adding someone to the watch list: ' + from);
+        bot.sendMessage(from, 'Added you to the watch list. Currently watching: http://maps.google.com?q=' + localStorage.getItem('location'));
     }
     else {
         console.log('Youre already on the notification list')
@@ -142,7 +144,7 @@ function initManager() {
         ee.on('WORKER.SENDMESSAGE', function(poke) {
             console.log('Sending alert!', poke);
             for(var i = 0; i < notify.length; i++) {
-                bot.sendMessage(notify[i], 'A wild ' + poke.name + ' appeared!\nYou have ~' + poke.timeRemaining + ' to get it!\n' + poke.map);
+                bot.sendMessage(notify[i], 'A wild ' + poke.name + ' appeared!\nYou have ' + poke.timeRemaining + ' to get it! (' + poke.experationTimeLocal + ')\n' + poke.map);
             }
         });
     }

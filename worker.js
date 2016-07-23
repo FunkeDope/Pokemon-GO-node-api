@@ -2,14 +2,13 @@ module.exports = function Worker(ee, loc) {
     'use strict';
     var PokemonGO = require('./poke.io.js'),
         fs = require('fs'),
+        moment = require('moment'),
         creds = require('./creds.js');
 
 
     var a = new PokemonGO.Pokeio();
 
     //Set environment variables or replace placeholder text
-    console.log(loc);
-
     var location = {
         type: 'name',
         name: loc //'4775 league island blvd 19112'
@@ -50,18 +49,22 @@ module.exports = function Worker(ee, loc) {
                         //console.log( heartbeat.cells[i].MapPokemon[x]);
                         var poke = hb.cells[i].MapPokemon[x];
 
-                        if(!knownPoke[poke.EncounterId] && poke.ExpirationTimeMs > 0) { //idk why, but some times they have -1 as an expired time?
+                        if(!knownPoke[poke.EncounterId] && parseFloat(poke.ExpirationTimeMs.toString()) > 0) { //idk why, but some times they have -1 as an expired time?
                             console.log('--New Pokemon Found!--');
                             var time = poke.ExpirationTimeMs - (new Date).getTime();
                             var min = (time / 1000 / 60) << 0;
                             var sec = (time / 1000) % 60;
+
+                            var dateTime = moment(poke.ExpirationTimeMs.toString(), 'x').format('h:mm:ss a ddd');
+
                             knownPoke[poke.EncounterId] = {
                                 name: a.pokemonlist[parseInt(poke.PokedexTypeId) - 1].name,
                                 location: {
                                     lat: poke.Latitude,
                                     long: poke.Longitude
                                 },
-                                experationTime: poke.ExpirationTimeMs,
+                                experationTime: parseFloat(poke.ExpirationTimeMs.toString()),
+                                experationTimeLocal: dateTime,
                                 timeRemaining: min + 'm ' + sec.toFixed(0) + 's',
                                 map: 'http://maps.google.com?q=' + poke.Latitude + ',' + poke.Longitude
                             };
@@ -83,6 +86,11 @@ module.exports = function Worker(ee, loc) {
                 delete knownPoke[poke];
             }
         }
+    }
+
+    // returns the hours number for a date, between 1 and 12
+    function hours12(date) {
+        return(date.getHours() + 24) % 12 || 12;
     }
 
 
