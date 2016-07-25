@@ -87,11 +87,4 @@ module.exports = function Worker(ee, loc) {
             }
         }
     }
-
-    // returns the hours number for a date, between 1 and 12
-    function hours12(date) {
-        return(date.getHours() + 24) % 12 || 12;
-    }
-
-
 };
