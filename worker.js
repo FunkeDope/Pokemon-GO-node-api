@@ -14,12 +14,12 @@ module.exports = function Worker(ee, loc) {
         name: loc //'4775 league island blvd 19112'
     };
 
-    /*var username = creds.ptc.user,
+    var username = creds.ptc.user,
         password = creds.ptc.pass,
-        provider = creds.ptc.type;*/
-    var username = creds.google.user,
+        provider = creds.ptc.type;
+    /*var username = creds.google.user,
         password = creds.google.pass,
-        provider = creds.google.type;
+        provider = creds.google.type;*/
 
     var knownPoke = [];
 
@@ -42,26 +42,10 @@ module.exports = function Worker(ee, loc) {
             if(err) {
                 console.log(err);
             }
-
-            //untill steps are fixed this is kinda useless...everything is always 200m away.
-            /*for(var i = 0; i < hb.cells.length; i++) {
-                for(var i = 0; i < hb.cells.length; i++) {
-                    if(hb.cells[i].NearbyPokemon.length > 0) {
-                        //console.log(a.pokemonlist[0])
-                        var poke = hb.cells[i].NearbyPokemon;
-                        console.log(poke);
-                        //var pokemon = a.pokemonlist[parseInt(poke.PokedexNumber) - 1];
-                        //console.log('[+] There is a ' + pokemon.name + ' at ' + poke.DistanceMeters.toString() + ' meters');
-
-                    }
-                }*/
-
-            //catchable pokemon around you right now
             for(var i = 0; i < hb.cells.length; i++) {
                 if(hb.cells[i].MapPokemon.length > 0) {
                     for(var x = 0; x < hb.cells[i].MapPokemon.length; x++) {
                         //console.log( heartbeat.cells[i].MapPokemon[x]);
-
                         var poke = hb.cells[i].MapPokemon[x];
 
                         if(!knownPoke[poke.EncounterId] && parseFloat(poke.ExpirationTimeMs.toString()) > 0) { //idk why, but some times they have -1 as an expired time?

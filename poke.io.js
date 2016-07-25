@@ -51,7 +51,7 @@ function getNeighbors(lat, lng) {
     // 10 before and 10 after
     var next = origin.next();
     var prev = origin.prev();
-    for(var i = 0; i < 20; i++) {
+    for(var i = 0; i < 10; i++) {
         // in range(10):
         walk.push(prev.id());
         walk.push(next.id());
@@ -124,18 +124,13 @@ function Pokeio() {
         };
 
         self.request.post(options, function(err, response, body) {
-            if(err) {
-                return callback(new Error('Error'));
-            }
-
             if(response === undefined || body === undefined) {
                 console.error('[!] RPC Server offline');
                 return callback(new Error('RPC Server offline'));
             }
 
-            var f_ret;
             try {
-                f_ret = ResponseEnvelop.decode(body);
+                var f_ret = ResponseEnvelop.decode(body);
             }
             catch(e) {
                 if(e.decoded) {
@@ -298,34 +293,6 @@ function Pokeio() {
     };
 
     // Still WIP
-    self.GetFortDetails = function(fortid, fortlat, fortlong, callback) {
-        var FortMessage = new RequestEnvelop.FortDetailsRequest({
-            'fort_id': fortid,
-            'fort_latitude': fortlat,
-            'fort_longitude': fortlong
-        });
-
-        var req = new RequestEnvelop.Requests(104, FortMessage.encode().toBuffer());
-
-        api_req(self.playerInfo.apiEndpoint, self.playerInfo.accessToken, req, function(err, f_ret) {
-            if(err) {
-                return callback(err);
-            }
-            else if(!f_ret || !f_ret.payload || !f_ret.payload[0]) {
-                return callback('No result');
-            }
-
-            try {
-                var FortSearchResponse = ResponseEnvelop.FortDetailsResponse.decode(f_ret.payload[0]);
-                callback(null, FortSearchResponse);
-            }
-            catch(err) {
-                callback(err, null);
-            }
-        });
-    };
-
-    // Still WIP
     self.GetFort = function(fortid, fortlat, fortlong, callback) {
         var FortMessage = new RequestEnvelop.FortSearchMessage({
             'fort_id': fortid,
@@ -345,71 +312,10 @@ function Pokeio() {
                 return callback('No result');
             }
 
-            try {
-                var FortSearchResponse = ResponseEnvelop.FortSearchResponse.decode(f_ret.payload[0]);
-                callback(null, FortSearchResponse);
-            }
-            catch(err) {
-                callback(err, null);
-            }
+            var FortSearchResponse = ResponseEnvelop.FortSearchResponse.decode(f_ret.payload[0]);
+            callback(null, FortSearchResponse);
         });
-    };
-
-    self.EvolvePokemon = function(pokemonId, callback) {
-        var _self$playerInfo3 = self.playerInfo;
-        var apiEndpoint = _self$playerInfo3.apiEndpoint;
-        var accessToken = _self$playerInfo3.accessToken;
-
-        var evolvePokemon = new RequestEnvelop.EvolvePokemonMessage({
-            'PokemonId': pokemonId
-        });
-
-        var req = new RequestEnvelop.Requests(125, evolvePokemon.encode().toBuffer());
-
-        api_req(apiEndpoint, accessToken, req, function(err, f_ret) {
-            if(err) {
-                return callback(err);
-            }
-            else if(!f_ret || !f_ret.payload || !f_ret.payload[0]) {
-                return callback('No result');
-            }
-            try {
-                var catchPokemonResponse = ResponseEnvelop.EvolvePokemonResponse.decode(f_ret.payload[0]);
-                callback(null, catchPokemonResponse);
-            }
-            catch(err) {
-                callback(err, null);
-            }
-        });
-    };
-
-    self.TransferPokemon = function(pokemonId, callback) {
-        var _self$playerInfo3 = self.playerInfo;
-        var apiEndpoint = _self$playerInfo3.apiEndpoint;
-        var accessToken = _self$playerInfo3.accessToken;
-
-        var evolvePokemon = new RequestEnvelop.TransferPokemonMessage({
-            'PokemonId': pokemonId
-        });
-
-        var req = new RequestEnvelop.Requests(112, evolvePokemon.encode().toBuffer());
-
-        api_req(apiEndpoint, accessToken, req, function(err, f_ret) {
-            if(err) {
-                return callback(err);
-            }
-            else if(!f_ret || !f_ret.payload || !f_ret.payload[0]) {
-                return callback('No result');
-            }
-            try {
-                var catchPokemonResponse = ResponseEnvelop.TransferPokemonResponse.decode(f_ret.payload[0]);
-                callback(null, catchPokemonResponse);
-            }
-            catch(err) {
-                callback(err, null);
-            }
-        });
-    };
+    }
 
     //still WIP
     self.CatchPokemon = function(mapPokemon, normalizedHitPosition, normalizedReticleSize, spinModifier, pokeball, callback) {
@@ -436,13 +342,9 @@ function Pokeio() {
             else if(!f_ret || !f_ret.payload || !f_ret.payload[0]) {
                 return callback('No result');
             }
-            try {
-                var catchPokemonResponse = ResponseEnvelop.CatchPokemonResponse.decode(f_ret.payload[0]);
-                callback(null, catchPokemonResponse);
-            }
-            catch(err) {
-                callback(err, null);
-            }
+
+            var catchPokemonResponse = ResponseEnvelop.CatchPokemonResponse.decode(f_ret.payload[0]);
+            callback(null, catchPokemonResponse);
         });
     };
 
@@ -470,73 +372,10 @@ function Pokeio() {
                 return callback('No result');
             }
 
-            try {
-                var catchPokemonResponse = ResponseEnvelop.EncounterResponse.decode(f_ret.payload[0]);
-                callback(null, catchPokemonResponse);
-            }
-            catch(err) {
-                callback(err, null);
-            }
-        });
-    };
-
-    self.DropItem = function(itemId, count, callback) {
-        var _self$playerInfo4 = self.playerInfo;
-        var apiEndpoint = _self$playerInfo4.apiEndpoint;
-        var accessToken = _self$playerInfo4.accessToken;
-        var latitude = _self$playerInfo4.latitude;
-        var longitude = _self$playerInfo4.longitude;
-
-        var dropItemMessage = new RequestEnvelop.RecycleInventoryItemMessage({
-            'item_id': itemId,
-            'count': count
-        });
-
-        var req = new RequestEnvelop.Requests(137, dropItemMessage.encode().toBuffer());
-
-        api_req(apiEndpoint, accessToken, req, function(err, f_ret) {
-            if(err) {
-                return callback(err);
-            }
-            else if(!f_ret || !f_ret.payload || !f_ret.payload[0]) {
-                return callback('No result');
-            }
-
-            var catchPokemonResponse = ResponseEnvelop.RecycleInventoryItemResponse.decode(f_ret.payload[0]);
+            var catchPokemonResponse = ResponseEnvelop.EncounterResponse.decode(f_ret.payload[0]);
             callback(null, catchPokemonResponse);
         });
     };
-
-
-    self.ReleasePokemon = function(pokemon, callback) {
-        console.log(pokemon.toString());
-        var releasePokemon = new RequestEnvelop.ReleasePokemonMessage({
-            'pokemon_id': pokemon.toString()
-        });
-        var req = new RequestEnvelop.Requests(112, releasePokemon.encode().toBuffer());
-
-        var _self$playerInfo3 = self.playerInfo;
-        var apiEndpoint = _self$playerInfo3.apiEndpoint;
-        var accessToken = _self$playerInfo3.accessToken;
-
-        api_req(apiEndpoint, accessToken, req, function(err, f_ret) {
-            if(err) {
-                return callback(err);
-            }
-            else if(!f_ret || !f_ret.payload || !f_ret.payload[0]) {
-                return callback('No result');
-            }
-            try {
-                var releasePokemonResponse = ResponseEnvelop.ReleasePokemonResponse.decode(f_ret.payload[0]);
-                callback(null, releasePokemonResponse);
-            }
-            catch(err) {
-                callback(err, null);
-            }
-        });
-
-    };
-
 
     self.GetLocationCoords = function() {
         var _self$playerInfo5 = self.playerInfo;
@@ -588,7 +427,6 @@ function Pokeio() {
             self.playerInfo.altitude = location.coords.altitude || self.playerInfo.altitude;
 
             geocoder.reverseGeocode.apply(geocoder, _toConsumableArray(GetCoords(self)).concat([function(err, data) {
-                if(err) return callback(err);
                 if(data && data.status !== 'ZERO_RESULTS' && data.results && data.results[0]) {
                     self.playerInfo.locationName = data.results[0].formatted_address;
                 }

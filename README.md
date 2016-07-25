@@ -49,18 +49,18 @@ The chat bot will now be listening. You can now drop it a pin in Hangouts and it
 
 Currently you can send the bot the following commands:
 
-## [Dropped Pin] or Google Maps link
+### [Dropped Pin] or Google Maps link
 
 This is how you control the bot mainly. Dropping a pin (which actually sends a nicely formatted google maps link) will start the bot and/or update the watch location. It will also add you to the watch list.
 
-## Add
+### Add
 
 'Add' will add another user to the watch list. They will be notified when a Pokemon is nearby as well. Dropping a pin also adds you to the watch list.
 
-## Stop
+### Stop
 
 'Stop' will remove you from the watch notification list.
 
-## Clear
+### Clear
 
 'Clear' will remove everyone from the watch list except you.
