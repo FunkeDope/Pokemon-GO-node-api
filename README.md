@@ -8,7 +8,7 @@ sudo npm install
 ```
 
 ## Demo:
-![alt tag](http://cl.arm4x.net/poke3.png)
+
 
 ## Documentation:
 
