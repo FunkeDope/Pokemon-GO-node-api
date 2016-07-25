@@ -1,115 +1,66 @@
-# Poke.io
-Pokemon GO api node.js library, still WIP<br>
-Check 'example.js' for examples
+# PokeHang
+A Google Hangouts bot that lets you know when there are Pokemon in your area!<br>
+Based off the [PokemonGo Node API](https://github.com/Armax/Pokemon-GO-node-api)
 
 ## Installation & Usage:
 ```
-npm install pokemon-go-node-api
+sudo npm install
 ```
-```javascript
-var Pokeio = require('pokemon-go-node-api')
-```
-Check [example.js](./example.js) for the result showed in the demo or check the documentation below.
 
 ## Demo:
 ![alt tag](http://cl.arm4x.net/poke3.png)
 
 ## Documentation:
 
-### Pokeio.init(username, password, location, provider, callback)
+### Config
 
-Initializes Pokeio with either pokemon trainer club credentials or google account.
-Accepts locations by name or coordinates
+See [PokemonGo Node API](https://github.com/Armax/Pokemon-GO-node-api) for base configuration.
 
-**Parameters**
-  * `username {String}` Your pokemon trainer club or google username
-  * `password {String}` Your pokemon trainer club or google password
-  * `location {Object}` location accepts a combination of type = 'name' & name or type = 'coords' & latitude, longitude, altitude
-    * `type {String}` Must be one of ['name', 'coords']
-    * `name {String}` Address for lookup using the google maps api.
-    * `coords {Object}`
-      * `latitude {Number}`
-      * `longitude {Number}`
-      * `altitude {Number}`
-  * `provider {String}` Must be one of ['ptc', 'google']
-  * `callback {Function(error)}`
-    * `error {Error}`
+You will also need a Google account to notify you. Why not use the same account that you are using with the API!?
 
-### Pokeio.GetAccessToken(username, password, callback)
+Create a `creds.js` file and add the following to it:
+```javascript
+module.exports = {
+    ptc: { //pokemon trainer club login
+        user: 'Username',
+        pass: 'Password',
+        type: 'ptc'
+    },
+    google: { //google login. note you only need one or the other unless you want to run multiple instances
+        user: 'username@gmail.com',
+        pass: 'password',
+        type: 'google'
+    },
+    hangouts: {
+        user: 'username@gmail.com',
+        pass: 'password'
+    }
+}
+```
 
-Will save the access token to the Pokeio internal state.
+### Example
 
-**Parameters**
-  * `username {String}` Your pokemon trainer club username
-  * `password {String}` Your pokemon trainer club password
-  * `callback {Function(error, token)}`
-    * `error {Error}`
-    * `token {String}`
+Once you have that ready, starting the app is simple
+`node manager.js`
 
-### Pokeio.GetApiEndpoint(callback)
+The chat bot will now be listening. You can now drop it a pin in Hangouts and it will start tracking all nearby Pokemon for you and send you a message when new ones pop up. Noe that you will need to change your chat settings to either allow everyone to contact me, or friend the bot first with your main google account.
 
-Will save the api endpoint to the Pokeio internal state.
+### Commands (WIP)
 
-**Parameters**
-  * `callback {Function(error, api_endpoint)}`
-    * `error {Error}`
-    * `api_endpoint {String}`
+Currently you can send the bot the following commands:
 
-### Pokeio.GetProfile(callback)
-**Parameters**
-  * `callback {Function(error, profile)}`
-    * `error {Error}`
-    * `profile {Object}`
-      * `creation_time {Number}`
-      * `username {String}`
-      * `team {Number}`
-      * `tutorial {Number/Boolean}`
-        * `poke_storage {String}`
-        * `item_storage {String}`
-        * `daily_bonus {Object}`
-          * `NextCollectTimestampMs {Number}`
-          * `NextDefenderBonusCollectTimestampMs {Number}`
-        * `currency {Object}`
-          * `type {String}`
-          * `amount {Number}`
+## [Dropped Pin] or Google Maps link
 
-### Pokeio.GetLocation(callback)
-Reads current latitude and longitude and returns a human readable address using the google maps api.
+This is how you control the bot mainly. Dropping a pin (which actually sends a nicely formatted google maps link) will start the bot and/or update the watch location. It will also add you to the watch list.
 
-**Parameters**
-  * `callback {Function(error, formatted_address)}`
-    * `error {Error}`
-    * `formatted_address {String}`
+## Add
 
-### Pokeio.GetLocationCoords()
-**Returns**
-  * `coordinates {Object}`
-    * `latitude {Number}`
-    * `longitude {Number}`
-    * `altitude {Number}`
+'Add' will add another user to the watch list. They will be notified when a Pokemon is nearby as well. Dropping a pin also adds you to the watch list.
 
-### Pokeio.SetLocation(location, callback)
+## Stop
 
-Will save cooridinates to the Pokeio internal state.
-Accepts raw coordinates or location name based on the type property.
+'Stop' will remove you from the watch notification list.
 
-**Parameters**
-  * `location {Object}`
-    * `type {String}` One of ['name', 'coords']
-    * `name {String}` Address for lookup using the google maps api.
-    * `latitude {Number}`
-    * `longitude {Number}`
-    * `altitude {Number}`
-  * `callback {Function(error, coordinates)}`
-    * `error {Error}`
-    * `coordinates {Object}`
-      * `latitude {Number}`
-      * `longitude {Number}`
-      * `altitude {Number}`
+## Clear
 
-## Thanks to:
-Python demo: [tejado](https://github.com/tejado/pokemongo-api-demo) <br>
-
-## Contact me
-[@Arm4x](https://twitter.com/Arm4x)
-Feel free to contact me for help or anything else
+'Clear' will remove everyone from the watch list except you.

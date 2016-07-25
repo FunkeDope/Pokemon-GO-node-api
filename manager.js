@@ -63,7 +63,7 @@ function initManager() {
         });
 
         bot.on('message', function(from, msg) {
-            msg = msg.toLowerCase();
+            msg = msg.toLowerCase().trim();
             if(msg === 'add') {
                 addUser(from);
             }
