@@ -20,19 +20,23 @@ if(typeof localStorage === "undefined" || localStorage === null) {
     localStorage = new LocalStorage('./scratch');
 }
 
+
 //hangouts bot
 var bot = new hangoutsBot(creds.hangouts.user, creds.hangouts.pass);
-var worker;
+worker = [];
+
 
 
 //start this b
 initManager();
 
 function initManager() {
-    var notify = [];
-    var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey'];
     /* Manager only code */
     if(cluster.isMaster) {
+
+        var worker = [];
+        var notify = [];
+        var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey'];
         cluster.on('online', function(worker) {
             console.log('Worker ' + worker.process.pid + ' is online');
         });
@@ -44,7 +48,7 @@ function initManager() {
             worker = cluster.fork();
         });
 
-        //send the worker 
+
 
 
         //routes and rest triggers
@@ -62,8 +66,11 @@ function initManager() {
             res.send('Placeholder, this will be the status page?');
         });
 
+
+        //hangouts bot
         bot.on('message', function(from, msg) {
-            msg = msg.toLowerCase().trim();
+            msg = msg.trim().toLowerCase();
+            console.log('GOT MESSAGE: ' + msg);
             if(msg === 'add') {
                 addUser(from);
             }
@@ -72,10 +79,14 @@ function initManager() {
                 localStorage.setItem('location', msg.substr(msg.indexOf('?q=') + 3, msg.length));
                 //kill all existing works
                 //TODO: add a way to just spin up multiple workers with different accounts etc
-                if(cluster && cluster.workers && cluster.workers.length > 0) {
+                /*if(cluster && cluster.workers && cluster.workers.length > 0) {
+                    console.log('killing workers');
                     for(var id in cluster.workers) {
                         cluster.workers[id].kill();
                     }
+                }*/
+                if(worker && worker.kill) {
+                    worker.kill();
                 }
                 else {
                     startWorkers();
@@ -106,6 +117,10 @@ function initManager() {
                 console.log(from + ' >> ' + msg);
             }
 
+        });
+
+        bot.on('online', function() {
+            console.log('--Chat bot up and running--');
         });
 
         function startWorkers() {
@@ -148,16 +163,6 @@ function initManager() {
                 console.log('Youre already on the notification list')
             }
         }
-
-        function getNotificationList() {
-            console.log('getting list ' + notify);
-            return notify;
-        }
-
-        //hangouts bot
-        bot.on('online', function() {
-            console.log('--Chat bot up and running--');
-        });
 
 
     }
