@@ -36,7 +36,7 @@ function initManager() {
 
         var worker = [];
         var notify = [];
-        var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey'];
+        var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey', 'pinsir', 'dodrio', 'rattata', 'zubat'];
         cluster.on('online', function(worker) {
             console.log('Worker ' + worker.process.pid + ' is online');
         });

@@ -42,13 +42,16 @@ module.exports = function Worker(ee, loc) {
         var compassRose = [];
         compassRose.push(initialLoc);
         var dataset = [];
-        dataset[0] = generateLocations(initialLoc.lat, initialLoc.long, .15);
-        dataset[1] = generateLocations(initialLoc.lat, initialLoc.long, .25);
+        dataset[0] = generateLocations(initialLoc.lat, initialLoc.long, .1);
+        dataset[1] = generateLocations(initialLoc.lat, initialLoc.long, .2);
+        dataset[2] = generateLocations(initialLoc.lat, initialLoc.long, .275);
         for(var i = 0; i < dataset.length; i++) {
             for(var x = 0; x < dataset[i].length; x++) {
                 compassRose.push(dataset[i][x]);
             }
         }
+
+        console.log(compassRose);
 
         //main loop
         var c = 0;
@@ -60,7 +63,7 @@ module.exports = function Worker(ee, loc) {
             if(c >= compassRose.length) {
                 c = 0;
             }
-        }, 5000);
+        }, 4000);
     });
 
     function checkPokemon() {
