@@ -15,17 +15,19 @@ module.exports = function Worker(ee, loc) {
         name: loc //'4775 league island blvd 19112'
     };
 
-    var username = creds.ptc.user,
+    /*var username = creds.ptc.user,
         password = creds.ptc.pass,
-        provider = creds.ptc.type;
-    /*var username = creds.google.user,
+        provider = creds.ptc.type;*/
+    var username = creds.google.user,
         password = creds.google.pass,
-        provider = creds.google.type;*/
+        provider = creds.google.type;
 
     var knownPoke = [];
 
     var initialLoc;
 
+    //temp. to help throttle maps calls. todo: pull from the main threads global list
+    var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey', 'pinsir', 'dodrio', 'rattata', 'zubat', 'poliwag', 'krabby', 'goldeen', 'spearow'];
 
     //log into pogo
     a.init(username, password, location, provider, function(err) {
@@ -80,43 +82,51 @@ module.exports = function Worker(ee, loc) {
                         //console.log( heartbeat.cells[i].MapPokemon[x]);
 
                         var poke = hb.cells[i].MapPokemon[x];
-
+                        var skip = false;
                         if(!knownPoke[poke.EncounterId] && parseFloat(poke.ExpirationTimeMs.toString()) > 0) { //idk why, but some times they have -1 as an expired time?
-
-                            var time = poke.ExpirationTimeMs - (new Date).getTime();
-                            var min = (time / 1000 / 60) << 0;
-                            var sec = (time / 1000) % 60;
-
-                            var dateTime = moment(poke.ExpirationTimeMs.toString(), 'x').format('h:mm:ss a ddd');
-
-                            var distanceFromHome = calculateDistance(initialLoc.lat, initialLoc.long, poke.Latitude, poke.Longitude);
-
-                            var humanAddress = '';
-
-                            geocoder.reverseGeocode(poke.Latitude, poke.Longitude, function(err, data) {
-                                if(err) {
-                                    console.log('Error reverse geocoding: ' + err);
+                            for(var t = 0; t < ignoreList.length; t++) {
+                                if(a.pokemonlist[parseInt(poke.PokedexTypeId) - 1].name.toLowerCase() === ignoreList[t]) {
+                                    skip = true;
+                                    console.log('Skipping: ' + a.pokemonlist[parseInt(poke.PokedexTypeId) - 1].name);
+                                    return;
                                 }
+                            }
+                            if(!skip) {
+                                var time = poke.ExpirationTimeMs - (new Date).getTime();
+                                var min = (time / 1000 / 60) << 0;
+                                var sec = (time / 1000) % 60;
 
-                                humanAddress = data.results[0].formatted_address;
+                                var dateTime = moment(poke.ExpirationTimeMs.toString(), 'x').format('h:mm:ss a ddd');
 
-                                knownPoke[poke.EncounterId] = {
-                                    name: a.pokemonlist[parseInt(poke.PokedexTypeId) - 1].name,
-                                    location: {
-                                        lat: poke.Latitude,
-                                        long: poke.Longitude
-                                    },
-                                    experationTime: parseFloat(poke.ExpirationTimeMs.toString()),
-                                    experationTimeLocal: dateTime,
-                                    timeRemaining: min + 'm ' + sec.toFixed(0) + 's',
-                                    distance: distanceFromHome,
-                                    address: humanAddress,
-                                    map: 'http://maps.google.com?q=' + poke.Latitude + ',' + poke.Longitude
-                                };
-                                console.log('--New Pokemon Found!--', knownPoke[poke.EncounterId].name, knownPoke[poke.EncounterId].map, knownPoke[poke.EncounterId].timeRemaining);
-                                //console.log(knownPoke[poke.EncounterId]);
-                                ee.emit('WORKER.SENDMESSAGE', knownPoke[poke.EncounterId]);
-                            }, creds.maps);
+                                var distanceFromHome = calculateDistance(initialLoc.lat, initialLoc.long, poke.Latitude, poke.Longitude);
+
+                                var humanAddress = '';
+
+                                geocoder.reverseGeocode(poke.Latitude, poke.Longitude, function(err, data) {
+                                    if(err) {
+                                        console.log('Error reverse geocoding: ' + err);
+                                    }
+
+                                    humanAddress = data.results[0].formatted_address;
+
+                                    knownPoke[poke.EncounterId] = {
+                                        name: a.pokemonlist[parseInt(poke.PokedexTypeId) - 1].name,
+                                        location: {
+                                            lat: poke.Latitude,
+                                            long: poke.Longitude
+                                        },
+                                        experationTime: parseFloat(poke.ExpirationTimeMs.toString()),
+                                        experationTimeLocal: dateTime,
+                                        timeRemaining: min + 'm ' + sec.toFixed(0) + 's',
+                                        distance: distanceFromHome,
+                                        address: humanAddress,
+                                        map: 'http://maps.google.com?q=' + poke.Latitude + ',' + poke.Longitude
+                                    };
+                                    console.log('--New Pokemon Found!--', knownPoke[poke.EncounterId].name, knownPoke[poke.EncounterId].map, knownPoke[poke.EncounterId].timeRemaining);
+                                    //console.log(knownPoke[poke.EncounterId]);
+                                    ee.emit('WORKER.SENDMESSAGE', knownPoke[poke.EncounterId]);
+                                }, creds.maps);
+                            }
 
 
                         }

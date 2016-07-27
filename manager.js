@@ -36,13 +36,17 @@ function initManager() {
 
         var worker = [];
         var notify = [];
-        var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey', 'pinsir', 'dodrio', 'rattata', 'zubat'];
+        var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey', 'pinsir', 'dodrio', 'rattata', 'zubat', 'poliwag', 'krabby', 'goldeen', 'spearow'];
         cluster.on('online', function(worker) {
             console.log('Worker ' + worker.process.pid + ' is online');
+            worker.send({
+                notify: notify,
+                ignore: ignoreList
+            });
         });
 
-        cluster.on('exit', function(worker, code, signal) {
-            console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
+        cluster.on('exit', function(wk, code, signal) {
+            console.log('Worker ' + wk.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
             console.log('Starting a new worker');
             //sendEmail('info', 'Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
             worker = cluster.fork();
@@ -85,10 +89,18 @@ function initManager() {
                         cluster.workers[id].kill();
                     }
                 }*/
-                if(worker && worker.kill) {
-                    worker.kill();
+
+                //console.log(cluster.workers['1']);
+                var totalWorkers = 0;
+                for(var id in cluster.workers) {
+                    cluster.workers[id].kill();
+                    totalWorkers++;
                 }
-                else {
+
+                /*if(worker && worker.kill) {
+                    worker.kill();
+                }*/
+                if(totalWorkers === 0) {
                     startWorkers();
                 }
                 addUser(from);
@@ -103,7 +115,6 @@ function initManager() {
                     if(notify[i] === from) {
                         delete notify[i];
                         worker.send({
-                            type: 'notify',
                             notify: notify
                         });
                         bot.sendMessage(from, 'You\'ve been removed from the list');
@@ -130,16 +141,6 @@ function initManager() {
             for(var i = 0; i < numWorkers; i++) {
                 worker = cluster.fork();
             }
-
-            worker.send({
-                type: 'notify',
-                notify: notify
-            });
-            worker.send({
-                type: 'ignore',
-                ignore: ignoreList
-            });
-
         }
 
         function addUser(from) {
@@ -153,7 +154,6 @@ function initManager() {
             if(!exists) {
                 notify.push(from);
                 worker.send({
-                    type: 'notify',
                     notify: notify
                 });
                 console.log('Adding someone to the watch list: ' + from, notify);
@@ -177,10 +177,11 @@ function initManager() {
 
 
         process.on('message', function(data) {
-            if(data.type === 'notify') {
+            console.log('worker received updates:', data);
+            if(data.notify) {
                 notify = data.notify;
             }
-            else if(data.type === 'ignore') {
+            if(data.ignore) {
                 ignoreList = data.ignore;
             }
         });
