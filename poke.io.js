@@ -19,6 +19,7 @@ var ProtoBuf = require('protobufjs');
 var GoogleOAuth = require('gpsoauthnode');
 var fs = require('fs');
 var s2 = require('s2geometry-node');
+var creds = require('./creds.js');
 
 var Logins = require('./logins');
 
@@ -415,7 +416,7 @@ function Pokeio() {
                 self.playerInfo.locationName = locationName;
 
                 callback(null, self.GetLocationCoords());
-            });
+            }, creds.maps);
         }
         else if(location.type === 'coords') {
             if(!location.coords) {

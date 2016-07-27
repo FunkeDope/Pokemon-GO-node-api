@@ -116,7 +116,7 @@ module.exports = function Worker(ee, loc) {
                                 console.log('--New Pokemon Found!--', knownPoke[poke.EncounterId].name, knownPoke[poke.EncounterId].map, knownPoke[poke.EncounterId].timeRemaining);
                                 //console.log(knownPoke[poke.EncounterId]);
                                 ee.emit('WORKER.SENDMESSAGE', knownPoke[poke.EncounterId]);
-                            });
+                            }, creds.maps);
 
 
                         }
