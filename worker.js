@@ -3,6 +3,7 @@ module.exports = function Worker(ee, loc) {
     var PokemonGO = require('./poke.io.js'),
         fs = require('fs'),
         moment = require('moment'),
+        geocoder = require('geocoder'),
         creds = require('./creds.js');
 
 
@@ -88,20 +89,36 @@ module.exports = function Worker(ee, loc) {
 
                             var dateTime = moment(poke.ExpirationTimeMs.toString(), 'x').format('h:mm:ss a ddd');
 
-                            knownPoke[poke.EncounterId] = {
-                                name: a.pokemonlist[parseInt(poke.PokedexTypeId) - 1].name,
-                                location: {
-                                    lat: poke.Latitude,
-                                    long: poke.Longitude
-                                },
-                                experationTime: parseFloat(poke.ExpirationTimeMs.toString()),
-                                experationTimeLocal: dateTime,
-                                timeRemaining: min + 'm ' + sec.toFixed(0) + 's',
-                                map: 'http://maps.google.com?q=' + poke.Latitude + ',' + poke.Longitude
-                            };
-                            console.log('--New Pokemon Found!--', knownPoke[poke.EncounterId].name, knownPoke[poke.EncounterId].map, knownPoke[poke.EncounterId].timeRemaining);
-                            //console.log(knownPoke[poke.EncounterId]);
-                            ee.emit('WORKER.SENDMESSAGE', knownPoke[poke.EncounterId]);
+                            var distanceFromHome = calculateDistance(initialLoc.lat, initialLoc.long, poke.Latitude, poke.Longitude);
+
+                            var humanAddress = '';
+
+                            geocoder.reverseGeocode(poke.Latitude, poke.Longitude, function(err, data) {
+                                if(err) {
+                                    console.log('Error reverse geocoding: ' + err);
+                                }
+
+                                humanAddress = data.results[0].formatted_address;
+
+                                knownPoke[poke.EncounterId] = {
+                                    name: a.pokemonlist[parseInt(poke.PokedexTypeId) - 1].name,
+                                    location: {
+                                        lat: poke.Latitude,
+                                        long: poke.Longitude
+                                    },
+                                    experationTime: parseFloat(poke.ExpirationTimeMs.toString()),
+                                    experationTimeLocal: dateTime,
+                                    timeRemaining: min + 'm ' + sec.toFixed(0) + 's',
+                                    distance: distanceFromHome,
+                                    address: humanAddress,
+                                    map: 'http://maps.google.com?q=' + poke.Latitude + ',' + poke.Longitude
+                                };
+                                console.log('--New Pokemon Found!--', knownPoke[poke.EncounterId].name, knownPoke[poke.EncounterId].map, knownPoke[poke.EncounterId].timeRemaining);
+                                //console.log(knownPoke[poke.EncounterId]);
+                                ee.emit('WORKER.SENDMESSAGE', knownPoke[poke.EncounterId]);
+                            });
+
+
                         }
                     }
 
@@ -154,6 +171,24 @@ module.exports = function Worker(ee, loc) {
         });
 
         return locs;
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        var R = 6371; // Radius of the earth in km
+        var dLat = deg2rad(lat2 - lat1); // deg2rad below
+        var dLon = deg2rad(lon2 - lon1);
+        var a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c; // Distance in km
+        d = d / 1.609344; //this is america, so make this in miles 
+        return d;
+    }
+
+    function deg2rad(deg) {
+        return deg * (Math.PI / 180)
     }
 
     function updateLocation(data) {

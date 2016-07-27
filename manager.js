@@ -202,8 +202,9 @@ function initManager() {
             }
             if(!ignore) {
                 console.log('Sending alert for ' + poke.name);
+                var msg = 'A wild ' + poke.name + ' appeared!\n' + poke.timeRemaining + ' remaining. (' + poke.experationTimeLocal + ')\nNear: ' + poke.address + '\n' + poke.map + '\n(' + (parseFloat(poke.distance) * 5280).toFixed(0) + 'ft / ' + parseFloat(poke.distance).toFixed(3) + 'mi away)';
                 for(var i = 0; i < notify.length; i++) {
-                    bot.sendMessage(notify[i], 'A wild ' + poke.name + ' appeared!\nYou have ' + poke.timeRemaining + ' to get it! (' + poke.experationTimeLocal + ')\n' + poke.map);
+                    bot.sendMessage(notify[i], msg);
                 }
             }
             else {
