@@ -27,7 +27,7 @@ module.exports = function Worker(ee, loc) {
     var initialLoc;
 
     //temp. to help throttle maps calls. todo: pull from the main threads global list
-    var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey', 'pinsir', 'dodrio', 'rattata', 'zubat', 'poliwag', 'krabby', 'goldeen', 'spearow'];
+    var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey', 'pinsir', 'dodrio', 'rattata', 'zubat', 'poliwag', 'krabby', 'goldeen', 'spearow', 'magnemite', 'voltorb'];
 
     //log into pogo
     a.init(username, password, location, provider, function(err) {
@@ -45,9 +45,16 @@ module.exports = function Worker(ee, loc) {
         var compassRose = [];
         compassRose.push(initialLoc);
         var dataset = [];
-        dataset[0] = generateLocations(initialLoc.lat, initialLoc.long, .1);
-        dataset[1] = generateLocations(initialLoc.lat, initialLoc.long, .2);
-        dataset[2] = generateLocations(initialLoc.lat, initialLoc.long, .275);
+        dataset[0] = generateLocations(initialLoc.lat, initialLoc.long, .05);
+        dataset[1] = generateLocations(initialLoc.lat, initialLoc.long, .075);
+        dataset[2] = generateLocations(initialLoc.lat, initialLoc.long, .1);
+        dataset[3] = generateLocations(initialLoc.lat, initialLoc.long, .125);
+        dataset[4] = generateLocations(initialLoc.lat, initialLoc.long, .15);
+        dataset[5] = generateLocations(initialLoc.lat, initialLoc.long, .175);
+        dataset[6] = generateLocations(initialLoc.lat, initialLoc.long, .2);
+        //dataset[7] = generateLocations(initialLoc.lat, initialLoc.long, .215);
+        dataset[7] = generateLocations(initialLoc.lat, initialLoc.long, .22);
+        dataset[8] = generateLocations(initialLoc.lat, initialLoc.long, .235);
         for(var i = 0; i < dataset.length; i++) {
             for(var x = 0; x < dataset[i].length; x++) {
                 compassRose.push(dataset[i][x]);
@@ -66,7 +73,7 @@ module.exports = function Worker(ee, loc) {
             if(c >= compassRose.length) {
                 c = 0;
             }
-        }, 4000);
+        }, 1500);
     });
 
     function checkPokemon() {

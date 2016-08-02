@@ -36,7 +36,7 @@ function initManager() {
 
         var worker = [];
         var notify = [];
-        var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey', 'pinsir', 'dodrio', 'rattata', 'zubat', 'poliwag', 'krabby', 'goldeen', 'spearow'];
+        var ignoreList = ['doduo', 'weedle', 'caterpie', 'pidgey', 'pinsir', 'dodrio', 'rattata', 'zubat', 'poliwag', 'krabby', 'goldeen', 'spearow', 'magnemite', 'voltorb'];
         cluster.on('online', function(worker) {
             console.log('Worker ' + worker.process.pid + ' is online');
             worker.send({
@@ -103,7 +103,9 @@ function initManager() {
                 if(totalWorkers === 0) {
                     startWorkers();
                 }
-                addUser(from);
+                setTimeout(function() {
+                    addUser(from);
+                }, 2000);
                 bot.sendMessage(from, 'Updated watch location...');
             }
             else if(msg === 'clear') {
