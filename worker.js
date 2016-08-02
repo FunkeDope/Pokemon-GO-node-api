@@ -46,22 +46,21 @@ module.exports = function Worker(ee, loc) {
         compassRose.push(initialLoc);
         var dataset = [];
         dataset[0] = generateLocations(initialLoc.lat, initialLoc.long, .05);
-        dataset[1] = generateLocations(initialLoc.lat, initialLoc.long, .075);
-        dataset[2] = generateLocations(initialLoc.lat, initialLoc.long, .1);
-        dataset[3] = generateLocations(initialLoc.lat, initialLoc.long, .125);
-        dataset[4] = generateLocations(initialLoc.lat, initialLoc.long, .15);
-        dataset[5] = generateLocations(initialLoc.lat, initialLoc.long, .175);
+        dataset[1] = generateLocations(initialLoc.lat, initialLoc.long, .1);
+        dataset[2] = generateLocations(initialLoc.lat, initialLoc.long, .15);
+        dataset[3] = generateLocations(initialLoc.lat, initialLoc.long, .2);
+        dataset[4] = generateLocations(initialLoc.lat, initialLoc.long, .25);
+        /*dataset[5] = generateLocations(initialLoc.lat, initialLoc.long, .175);
         dataset[6] = generateLocations(initialLoc.lat, initialLoc.long, .2);
-        //dataset[7] = generateLocations(initialLoc.lat, initialLoc.long, .215);
         dataset[7] = generateLocations(initialLoc.lat, initialLoc.long, .22);
-        dataset[8] = generateLocations(initialLoc.lat, initialLoc.long, .235);
+        dataset[8] = generateLocations(initialLoc.lat, initialLoc.long, .235);*/
         for(var i = 0; i < dataset.length; i++) {
             for(var x = 0; x < dataset[i].length; x++) {
                 compassRose.push(dataset[i][x]);
             }
         }
 
-        console.log(compassRose);
+        console.log(require('util').inspect(compassRose, true, 10));
 
         //main loop
         var c = 0;
@@ -90,7 +89,7 @@ module.exports = function Worker(ee, loc) {
 
                         var poke = hb.cells[i].MapPokemon[x];
                         var skip = false;
-                        if(!knownPoke[poke.EncounterId] && parseFloat(poke.ExpirationTimeMs.toString()) > 0) { //idk why, but some times they have -1 as an expired time?
+                        if(!knownPoke[poke.EncounterId] && parseFloat(poke.ExpirationTimeMs.toString()) > 0) { //idk why, but some times they have -1 as an exMath.PIred time?
                             for(var t = 0; t < ignoreList.length; t++) {
                                 if(a.pokemonlist[parseInt(poke.PokedexTypeId) - 1].name.toLowerCase() === ignoreList[t]) {
                                     skip = true;
@@ -144,51 +143,78 @@ module.exports = function Worker(ee, loc) {
         });
     }
 
-
-
     function generateLocations(lat, long, distance) {
         //check ~ .25km in all 4 directions
         var locs = [],
-            northLat = lat + (distance / 6378) * (180 / 3.14159),
-            southLat = lat - (distance / 6378) * (180 / 3.14159),
-            eastLong = long + (distance / 6378) * (180 / 3.14159) / Math.cos(lat * 3.15159 / 180),
-            westLong = long - (distance / 6378) * (180 / 3.14159) / Math.cos(lat * 3.15159 / 180);
+            neighbors = getNeighbors(lat, long, distance);
+
 
         locs.push({ //north
-            lat: northLat,
+            lat: neighbors.northLat,
             long: long
         });
         locs.push({ //north east
-            lat: northLat,
-            long: eastLong
+            lat: neighbors.northLat,
+            long: neighbors.eastLong
         });
         locs.push({ //east
             lat: lat,
-            long: eastLong
+            long: neighbors.eastLong
         });
         locs.push({ //south east
-            lat: southLat,
-            long: eastLong
+            lat: neighbors.southLat,
+            long: neighbors.eastLong
         });
         locs.push({ //south
-            lat: southLat,
+            lat: neighbors.southLat,
             long: long
         });
         locs.push({ //south west
-            lat: southLat,
-            long: westLong
+            lat: neighbors.southLat,
+            long: neighbors.westLong
         });
         locs.push({ //west
             lat: lat,
-            long: westLong
+            long: neighbors.westLong
         });
         locs.push({ //north west
-            lat: northLat,
-            long: westLong
+            lat: neighbors.northLat,
+            long: neighbors.westLong
         });
+
+        //do middles too
+        if(distance > .05) {
+            var points = [];
+            points.push(generateLocations(neighbors.northLat, neighbors.eastLong, .05));
+            points.push(generateLocations(neighbors.northLat, neighbors.westLong, .05));
+            points.push(generateLocations(neighbors.southLat, neighbors.eastLong, .05));
+            points.push(generateLocations(neighbors.southLat, neighbors.westLong, .05));
+
+            for(var i = 0; i < points.length; i++) {
+                for(var point in points[i]) {
+                    locs.push({
+                        lat: points[i][point].lat,
+                        long: points[i][point].long
+                    });
+                }
+            }
+        }
 
         return locs;
     }
+
+    function getNeighbors(lat, long, distance) {
+        var neighbors = {
+            northLat: lat + (distance / 6378) * (180 / Math.PI),
+            southLat: lat - (distance / 6378) * (180 / Math.PI),
+            eastLong: long + (distance / 6378) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180),
+            westLong: long - (distance / 6378) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180)
+        }
+
+        return neighbors;
+
+    }
+
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
         var R = 6371; // Radius of the earth in km
